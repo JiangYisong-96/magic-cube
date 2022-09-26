@@ -1,0 +1,96 @@
+server:
+  port: 9091
+  # 配置静态资源启用 gzip 压缩
+  compression:
+    enabled: true
+    min-response-size: 128
+# 配置主数据源
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  datasource:
+    url: jdbc:mysql://localhost/magic?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
+    username: root
+    password: P@ssw0rd1234
+#  data:
+    # 配置mongo数据源
+#    mongodb:
+#      host: localhost
+#      port: 27017
+#      database: magicapi
+#      username: magicapi
+#      password: 123456
+# 配置redis数据源
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    timeout: 1000
+    password: P@ssw0rd1234
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+magic-api:
+  web: /magic/web
+  resource:
+    type: database  # 配置接口存储方式，这里选择存在数据库中
+    table-name: magic_api_file  # 数据库中的表名
+    prefix: /magic-api  # 前缀
+#    location: classpath:magic-api
+# 其它配置请参考 https://ssssssss.org/magic-api/config/
+
+  date-pattern: # 配置请求参数支持的日期格式
+    - yyyy-MM-dd
+    - yyyy-MM-dd HH:mm:ss
+    - yyyyMMddHHmmss
+    - yyyyMMdd
+  response: |- #配置JSON格式，格式为magic-script中的表达式
+    {
+      code: code,
+      message: message,
+      data,
+      timestamp,
+      requestTime,
+      executeTime,
+    }
+  response-code:
+    success: 1 #执行成功的code值
+    invalid: 0 #参数验证未通过的code值
+    exception: -1 #执行出现异常的code值
+  banner: true # 打印banner
+  thread-pool-executor-size: 8 # async语句的线程池大小
+  throw-exception: false #执行出错时是否抛出异常
+  backup: #备份相关配置
+    enable: true #是否启用
+    max-history: -1 #备份保留天数，-1为永久保留
+    #datasource: magic  #指定数据源（单数据源时无需配置，多数据源时默认使用主数据源，如果存在其他数据源中需要指定。）
+    table-name: magic_api_backup #使用数据库存储备份时的表名
+  crud: # CRUD相关配置
+    logic-delete-column: deleted #逻辑删除列
+    logic-delete-value: 1 #逻辑删除值
+  cache: # 缓存相关配置
+    capacity: 10000 #缓存容量
+    ttl: -1 # 永不过期
+    enable: true # 启用缓存
+  page:
+    size: size # 页大小的参数名称
+    page: page # 页码的参数名称
+    default-page: 1 # 未传页码时的默认首页
+    default-size: 10 # 未传页大小时的默认页大小
+  security:  # 安全配置
+    username: admin # 登录用的用户名
+    password: 123456 # 登录用的密码
+  swagger:
+    version: 1.0
+    description: MagicAPI 接口信息
+    title: MagicAPI Swagger Docs
+    name: MagicAPI 接口
+    location: /v2/api-docs/magic-api/swagger2.json
+  debug:
+    timeout: 60 # 断点超时时间，默认60s
+
+spring.mvc.pathmatch.matching-strategy: ANT_PATH_MATCHER
