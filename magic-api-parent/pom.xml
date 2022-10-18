@@ -11,23 +11,6 @@
     <description>auto generate http api</description>
     <url>https://ssssssss.org/</url>
     <inceptionYear>2020</inceptionYear>
-    <licenses>
-        <license>
-            <name>The MIT License (MIT)</name>
-            <url>https://github.com/ssssssss-team/magic-api/blob/master/LICENSE</url>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <name>jmxd</name>
-            <email>838425805@qq.com</email>
-        </developer>
-    </developers>
-    <scm>
-        <url>https://gitee.com/ssssssss-team/magic-api</url>
-        <connection>scm:git:https://gitee.com/ssssssss-team/magic-api.git</connection>
-        <developerConnection>scm:git:https://gitee.com/ssssssss-team/magic-api.git</developerConnection>
-    </scm>
     <properties>
         <spring-boot.version>2.7.0</spring-boot.version>
         <magic-script.version>1.8.5</magic-script.version>

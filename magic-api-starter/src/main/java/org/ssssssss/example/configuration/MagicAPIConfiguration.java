@@ -1,7 +1,14 @@
 package org.ssssssss.example.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.ssssssss.example.interceptor.CustomRequestInterceptor;
 import org.ssssssss.example.interceptor.CustomUIAuthorizationInterceptor;
 import org.ssssssss.example.provider.*;
@@ -10,8 +17,10 @@ import org.ssssssss.example.scripts.CustomFunctionExtension;
 import org.ssssssss.example.scripts.CustomModule;
 import org.ssssssss.magicapi.datasource.model.MagicDynamicDataSource;
 import org.ssssssss.magicapi.modules.db.provider.PageProvider;
+import redis.clients.jedis.JedisPoolConfig;
 
 import javax.sql.DataSource;
+import java.time.Duration;
 
 /**
  * magic-api 配置类
@@ -20,7 +29,14 @@ import javax.sql.DataSource;
  */
 @Configuration
 public class MagicAPIConfiguration {
-
+	@Value("${spring.redis.host}")
+	private String host;
+	@Value("${spring.redis.database}")
+	private Integer database;
+	@Value("${spring.redis.port}")
+	private Integer port;
+	@Value("${spring.redis.password}")
+	private String pwd;
 	/**
 	 * 配置多数据源
 	 *
@@ -34,6 +50,29 @@ public class MagicAPIConfiguration {
 		return dynamicDataSource;
 	}
 
+	@Bean(name = "jedisPoolConfig")
+	@ConfigurationProperties(prefix = "spring.redis.pool")
+	@Cacheable
+	public JedisPoolConfig jedisPoolConfig() {
+		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+		jedisPoolConfig.setMaxWait(Duration.ofSeconds(150));
+		return jedisPoolConfig;
+	}
+
+	@Bean
+	@Cacheable
+	public RedisConnectionFactory redisConnectionFactory(JedisPoolConfig jedisPoolConfig) {
+		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+		redisStandaloneConfiguration.setHostName(host);
+		redisStandaloneConfiguration.setDatabase(database);
+		redisStandaloneConfiguration.setPassword(pwd);
+		redisStandaloneConfiguration.setPort(port);
+		JedisClientConfiguration.JedisPoolingClientConfigurationBuilder jpcb =
+				(JedisClientConfiguration.JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();
+		jpcb.poolConfig(jedisPoolConfig);
+		JedisClientConfiguration jedisClientConfiguration = jpcb.build();
+		return new JedisConnectionFactory(redisStandaloneConfiguration, jedisClientConfiguration);
+	}
 
 	/**
 	 * 配置自定义JSON结果

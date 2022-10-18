@@ -81,7 +81,7 @@ public class SwaggerProvider {
 				if (this.persistenceResponseBody) {
 					baseDefinition = info.getResponseBodyDefinition();
 					if (baseDefinition != null) {
-						Map responseMap = parseResponse(info);
+						Map<String, Object> responseMap = parseResponse(info);
 						if (!responseMap.isEmpty()) {
 							path.setResponses(responseMap);
 							doProcessDefinition(baseDefinition, info, groupName, "root_" + baseDefinition.getName(), "response", 0);

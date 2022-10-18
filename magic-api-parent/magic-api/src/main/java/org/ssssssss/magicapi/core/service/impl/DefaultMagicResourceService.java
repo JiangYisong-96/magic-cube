@@ -210,7 +210,7 @@ public class DefaultMagicResourceService implements MagicResourceService, JsonCo
 			folder.dirs().forEach(dir -> {
 				Resource meta = dir.getResource(Constants.GROUP_METABASE);
 				if (meta.exists()) {
-					putGroup(JsonUtils.readValue(meta.read(), Group.class), dir);
+					putGroup(Objects.requireNonNull(JsonUtils.readValue(meta.read(), Group.class)), dir);
 					dir.files(storage.suffix()).forEach(file -> putFile(storage, storage.readResource(file), file));
 				}
 			});

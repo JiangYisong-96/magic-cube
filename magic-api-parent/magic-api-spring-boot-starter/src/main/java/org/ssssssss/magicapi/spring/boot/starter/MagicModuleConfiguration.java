@@ -1,10 +1,5 @@
 package org.ssssssss.magicapi.spring.boot.starter;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -41,6 +36,12 @@ import org.ssssssss.magicapi.modules.servlet.RequestModule;
 import org.ssssssss.magicapi.modules.servlet.ResponseModule;
 import org.ssssssss.magicapi.modules.spring.EnvModule;
 import org.ssssssss.magicapi.modules.test.TestModule;
+
+import javax.sql.DataSource;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MagicModuleConfiguration {
 
@@ -203,7 +204,6 @@ public class MagicModuleConfiguration {
     public ResultProvider resultProvider() {
         return new DefaultResultProvider(properties.getResponse());
     }
-
 
     @Bean
     @ConditionalOnMissingBean

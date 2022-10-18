@@ -1,12 +1,10 @@
-package org.ssssssss.magicapi.core.service;
-
-import org.springframework.data.redis.core.RedisTemplate;
+package org.ssssssss.magicapi.redis.service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface MagicGlobalCache {
+public interface RedisService {
     /**
      * 指定缓存失效时间
      *
@@ -20,7 +18,7 @@ public interface MagicGlobalCache {
      * @param key 键 不能为null
      * @return 时间(秒) 返回0代表为永久有效
      */
-    Long getExpire(String key);
+    long getExpire(String key);
 
     /**
      * 判断key是否存在
@@ -72,7 +70,7 @@ public interface MagicGlobalCache {
      * @param delta 要增加几(大于0)
      * @return
      */
-    Long incr(String key, long delta);
+    long incr(String key, long delta);
 
     /**
      * 递减
@@ -81,7 +79,7 @@ public interface MagicGlobalCache {
      * @param delta 要减少几(小于0)
      * @return
      */
-    Long decr(String key, long delta);
+    long decr(String key, long delta);
 
     /**
      * HashGet
@@ -201,7 +199,7 @@ public interface MagicGlobalCache {
      * @param values 值 可以是多个
      * @return 成功个数
      */
-    Long sSet(String key, Object... values);
+    long sSet(String key, Object... values);
 
     /**
      * 将set数据放入缓存
@@ -211,7 +209,7 @@ public interface MagicGlobalCache {
      * @param values 值 可以是多个
      * @return 成功个数
      */
-    Long sSetAndTime(String key, long time, Object... values);
+    long sSetAndTime(String key, long time, Object... values);
 
 
     /**
@@ -220,7 +218,7 @@ public interface MagicGlobalCache {
      * @param key 键
      * @return
      */
-    Long sGetSetSize(String key);
+    long sGetSetSize(String key);
 
     /**
      * 移除值为value的
@@ -229,7 +227,7 @@ public interface MagicGlobalCache {
      * @param values 值 可以是多个
      * @return 移除的个数
      */
-    Long setRemove(String key, Object... values);
+    long setRemove(String key, Object... values);
 
     /**
      * 获取list缓存的内容
@@ -247,7 +245,7 @@ public interface MagicGlobalCache {
      * @param key 键
      * @return
      */
-    Long lGetListSize(String key);
+    long lGetListSize(String key);
 
     /**
      * 通过索引 获取list中的值
@@ -354,7 +352,7 @@ public interface MagicGlobalCache {
      * @param value 值
      * @return 移除的个数
      */
-    Long lRemove(String key, long count, Object value);
+    long lRemove(String key, long count, Object value);
 
     /**
      * 从redis集合中移除[start,end]之间的元素
@@ -367,9 +365,10 @@ public interface MagicGlobalCache {
     void rangeRemove(String key, Long stard, Long end);
 
     /**
-     * 返回当前redisTemplate
+     * 执行命令
      *
-     * @return
+     * @param methodName 命令名称
+     * @param parameters 命令参数
      */
-    RedisTemplate getRedisTemplate();
+    Object redisExecute(String methodName, List<Object> parameters);
 }

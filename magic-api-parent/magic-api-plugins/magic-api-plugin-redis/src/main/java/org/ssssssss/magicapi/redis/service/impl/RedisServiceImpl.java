@@ -1,26 +1,19 @@
-package org.ssssssss.magicapi.core.service.impl;
+package org.ssssssss.magicapi.redis.service.impl;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
-import org.ssssssss.magicapi.core.service.MagicGlobalCache;
+import org.ssssssss.magicapi.redis.service.RedisService;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Redis缓存实现类
- *
- **/
-@Getter
 @AllArgsConstructor
-public final class MagicRedisServiceImpl implements MagicGlobalCache {
+public class RedisServiceImpl implements RedisService {
 
-    private RedisTemplate<String, Object> redisTemplate;
+
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public boolean expire(String key, long time) {
@@ -36,14 +29,14 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long getExpire(String key) {
+    public long getExpire(String key) {
         return redisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 
     @Override
     public boolean hasKey(String key) {
         try {
-            return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+            return redisTemplate.hasKey(key);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -64,6 +57,7 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
 
     @Override
     public Object get(String key) {
+        System.out.println(redisTemplate==null ? "it is null." : "it is not null");
         return key == null ? null : redisTemplate.opsForValue().get(key);
     }
 
@@ -94,7 +88,7 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long incr(String key, long delta) {
+    public long incr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递增因子必须大于0");
         }
@@ -102,7 +96,7 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long decr(String key, long delta) {
+    public long decr(String key, long delta) {
         if (delta < 0) {
             throw new RuntimeException("递减因子必须大于0");
         }
@@ -202,7 +196,7 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     @Override
     public boolean sHasKey(String key, Object value) {
         try {
-            return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, value));
+            return redisTemplate.opsForSet().isMember(key, value);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -210,17 +204,17 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long sSet(String key, Object... values) {
+    public long sSet(String key, Object... values) {
         try {
             return redisTemplate.opsForSet().add(key, values);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
     @Override
-    public Long sSetAndTime(String key, long time, Object... values) {
+    public long sSetAndTime(String key, long time, Object... values) {
         try {
             Long count = redisTemplate.opsForSet().add(key, values);
             if (time > 0) {
@@ -229,27 +223,27 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
             return count;
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
     @Override
-    public Long sGetSetSize(String key) {
+    public long sGetSetSize(String key) {
         try {
             return redisTemplate.opsForSet().size(key);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
     @Override
-    public Long setRemove(String key, Object... values) {
+    public long setRemove(String key, Object... values) {
         try {
             return redisTemplate.opsForSet().remove(key, values);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
@@ -264,12 +258,12 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long lGetListSize(String key) {
+    public long lGetListSize(String key) {
         try {
             return redisTemplate.opsForList().size(key);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
@@ -396,12 +390,12 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
     }
 
     @Override
-    public Long lRemove(String key, long count, Object value) {
+    public long lRemove(String key, long count, Object value) {
         try {
             return redisTemplate.opsForList().remove(key, count, value);
         } catch (Exception e) {
             e.printStackTrace();
-            return 0L;
+            return 0;
         }
     }
 
@@ -414,4 +408,50 @@ public final class MagicRedisServiceImpl implements MagicGlobalCache {
         }
     }
 
+    /**
+     * 序列化
+     */
+    private byte[] serializer(Object value) {
+        if (value == null || value instanceof String) {
+            return redisTemplate.getStringSerializer().serialize((String) value);
+        }
+        return serializer(value.toString());
+    }
+
+    /**
+     * 反序列化
+     */
+    @SuppressWarnings("unchecked")
+    private Object deserialize(Object value) {
+        if (value != null) {
+            if (value instanceof byte[]) {
+                return this.redisTemplate.getStringSerializer().deserialize((byte[]) value);
+            }
+            if (value instanceof List) {
+                List<Object> valueList = (List<Object>) value;
+                List<Object> resultList = new ArrayList<>(valueList.size());
+                for (Object val : valueList) {
+                    resultList.add(deserialize(val));
+                }
+                return resultList;
+            }
+            if(value instanceof Map){
+                Map<Object, Object> map = (Map<Object, Object>) value;
+                LinkedHashMap<Object, Object> newMap = new LinkedHashMap<>(map.size());
+                map.forEach((key, val) -> newMap.put(deserialize(key), deserialize(val)));
+                return newMap;
+            }
+        }
+        return value;
+    }
+
+    public Object redisExecute(String methodName, List<Object> parameters) {
+        return this.redisTemplate.execute((RedisCallback<Object>) connection -> {
+            byte[][] params = new byte[parameters.size()][];
+            for (int i = 0; i < params.length; i++) {
+                params[i] = serializer(parameters.get(i));
+            }
+            return deserialize(connection.execute(methodName, params));
+        });
+    }
 }

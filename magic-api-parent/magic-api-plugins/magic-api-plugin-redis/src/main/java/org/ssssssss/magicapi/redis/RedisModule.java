@@ -1,62 +1,27 @@
 package org.ssssssss.magicapi.redis;
 
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.ssssssss.magicapi.core.annotation.MagicModule;
+import org.ssssssss.magicapi.redis.service.RedisService;
+import org.ssssssss.magicapi.redis.service.impl.RedisServiceImpl;
+import org.ssssssss.script.annotation.Comment;
 import org.ssssssss.script.functions.DynamicMethod;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * redis模块
  *
  * @author mxd
  */
+@Component
 @MagicModule("redis")
 public class RedisModule implements DynamicMethod {
+	private final RedisService redisService;
 
-	private final StringRedisTemplate redisTemplate;
-
-	public RedisModule(RedisConnectionFactory connectionFactory) {
-		this.redisTemplate = new StringRedisTemplate(connectionFactory);
-	}
-
-	/**
-	 * 序列化
-	 */
-	private byte[] serializer(Object value) {
-		if (value == null || value instanceof String) {
-			return redisTemplate.getStringSerializer().serialize((String) value);
-		}
-		return serializer(value.toString());
-	}
-
-	/**
-	 * 反序列化
-	 */
-	@SuppressWarnings("unchecked")
-	private Object deserialize(Object value) {
-		if (value != null) {
-			if (value instanceof byte[]) {
-				return this.redisTemplate.getStringSerializer().deserialize((byte[]) value);
-			}
-			if (value instanceof List) {
-				List<Object> valueList = (List<Object>) value;
-				List<Object> resultList = new ArrayList<>(valueList.size());
-				for (Object val : valueList) {
-					resultList.add(deserialize(val));
-				}
-				return resultList;
-			}
-			if(value instanceof Map){
-				Map<Object, Object> map = (Map<Object, Object>) value;
-				LinkedHashMap<Object, Object> newMap = new LinkedHashMap<>(map.size());
-				map.forEach((key, val) -> newMap.put(deserialize(key), deserialize(val)));
-				return newMap;
-			}
-		}
-		return value;
+	public RedisModule(RedisTemplate<String, Object> redisTemplate) {
+		this.redisService = new RedisServiceImpl(redisTemplate);
 	}
 
 	/**
@@ -67,12 +32,50 @@ public class RedisModule implements DynamicMethod {
 	 */
 	@Override
 	public Object execute(String methodName, List<Object> parameters) {
-		return this.redisTemplate.execute((RedisCallback<Object>) connection -> {
-			byte[][] params = new byte[parameters.size()][];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = serializer(parameters.get(i));
-			}
-			return deserialize(connection.execute(methodName, params));
-		});
+		return redisService.redisExecute(methodName, parameters);
 	}
+	/*
+	======================= General ============
+	 */
+	@Comment("判斷可以是否存在")
+	public boolean hasKey(@Comment(name = "key", value = "key value") String key) {
+		return redisService.hasKey(key);
+	}
+
+	@Comment("指定緩存失效時間")
+	public boolean expire(@Comment(name = "key", value = "key value") String key,
+						  @Comment(name = "time", value = "expire time in ms") long time) {
+		return redisService.expire(key, time);
+	}
+	/*
+	======================= KV =================
+	 */
+
+	@Comment("插入 key value 到redis 缓存。")
+	public Boolean set(@Comment(name = "key", value = "key value") String key,
+					  @Comment(name = "value", value = "matched object") Object value) {
+		return redisService.set(key, value);
+	}
+
+	@Comment("插入 key value 以及 有效时间到redis缓存。")
+	public Boolean set(@Comment(name = "key", value = "key value") String key,
+					   @Comment(name = "value", value = "matched object") Object value,
+					   @Comment(name = "time", value = "expire time in ms") long time){
+		return redisService.set(key, value, time);
+	}
+
+	@Comment("从redis缓存中通过key 读取 value")
+	public Object get(@Comment(name = "key", value = "key value") String key) {
+		return redisService.get(key);
+	}
+
+	@Comment("删除key键所对应的对象")
+	public void del(@Comment(name = "key", value = "key value") String key) throws Exception {
+		try {
+			redisService.del(key);
+		} catch (Exception e) {
+			throw new Exception(e);
+		}
+	}
+
 }

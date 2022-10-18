@@ -42,7 +42,7 @@ public class MagicAPIProperties {
      *
      * @since 0.3.2
      */
-    private String autoImportModule = "db, test";
+    private String autoImportModule = "db, test, redis";
     /**
      * 可自动导入的包（目前只支持以.*结尾的通配符），多个用","分隔
      *

@@ -6,11 +6,14 @@ server:
     min-response-size: 128
 # 配置主数据源
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
   datasource:
-    url: jdbc:mysql://localhost/magic?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://10.200.40.210/magic?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
     username: root
     password: P@ssw0rd1234
 #  data:
@@ -23,10 +26,10 @@ spring:
 #      password: 123456
 # 配置redis数据源
   redis:
-    host: 127.0.0.1
+    host: 10.200.40.210
     port: 6379
     database: 0
-    timeout: 1000
+    timeout: 1500
     password: P@ssw0rd1234
     jedis:
       pool:
@@ -92,5 +95,3 @@ magic-api:
     location: /v2/api-docs/magic-api/swagger2.json
   debug:
     timeout: 60 # 断点超时时间，默认60s
-
-spring.mvc.pathmatch.matching-strategy: ANT_PATH_MATCHER
