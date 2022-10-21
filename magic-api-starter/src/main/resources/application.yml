@@ -16,20 +16,12 @@ spring:
     url: jdbc:mysql://10.200.40.210/magic?useSSL=false&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
     username: root
     password: P@ssw0rd1234
-#  data:
-    # 配置mongo数据源
-#    mongodb:
-#      host: localhost
-#      port: 27017
-#      database: magicapi
-#      username: magicapi
-#      password: 123456
 # 配置redis数据源
   redis:
     host: 10.200.40.210
     port: 6379
     database: 0
-    timeout: 1500
+    timeout: 15000
     password: P@ssw0rd1234
     jedis:
       pool:
@@ -37,6 +29,21 @@ spring:
         max-wait: -1
         max-idle: 8
         min-idle: 0
+  rabbitmq:
+    rabbitServer[0]:
+      id: vb
+      host: 10.200.40.210
+      port: 5672
+      username: magic
+      password: P@ssw0rd1234
+      virtual-host: /magic
+    rabbitServer[1]:
+      id: vb_test
+      host: 10.200.40.211
+      port: 5672
+      username: magic_test
+      password: 12345678
+      virtual-host: /magic-test
 magic-api:
   web: /magic/web
   resource:

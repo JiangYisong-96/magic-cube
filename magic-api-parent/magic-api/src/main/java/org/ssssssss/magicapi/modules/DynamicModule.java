@@ -1,11 +1,10 @@
 package org.ssssssss.magicapi.modules;
 
-import org.ssssssss.script.MagicScriptContext;
-
 import java.beans.Transient;
+import org.ssssssss.script.MagicScriptContext;
 
 public interface DynamicModule<T> {
 
-	@Transient
-	T getDynamicModule(MagicScriptContext context);
+  @Transient
+  T getDynamicModule(MagicScriptContext context);
 }

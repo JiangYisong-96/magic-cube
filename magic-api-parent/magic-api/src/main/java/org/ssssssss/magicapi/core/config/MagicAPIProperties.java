@@ -1,13 +1,14 @@
 package org.ssssssss.magicapi.core.config;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.ssssssss.magicapi.core.web.RequestHandler;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * magic-api配置信息
@@ -42,7 +43,7 @@ public class MagicAPIProperties {
      *
      * @since 0.3.2
      */
-    private String autoImportModule = "db, test, redis";
+    private String autoImportModule = "db";
     /**
      * 可自动导入的包（目前只支持以.*结尾的通配符），多个用","分隔
      *
